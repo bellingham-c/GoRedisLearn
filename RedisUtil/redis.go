@@ -1,0 +1,5 @@
+package RedisUtil
+
+func Initial() {
+
+}
