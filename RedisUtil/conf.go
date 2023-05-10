@@ -7,11 +7,11 @@ type Conf struct {
 }
 
 func GetAddr() string {
-	return "ip:6379"
+	return "192.168.192.129:6379"
 }
 
 func GetPwd() string {
-	return "password"
+	return "caojinbo"
 }
 func GetDb() int {
 	return 0

@@ -1,30 +1,26 @@
 package main
 
 import (
-	"GoRedisLearn/RedisUtil"
-	"context"
-	"fmt"
-	"github.com/redis/go-redis/v9"
+	"GoRedisLearn/DB"
+	"GoRedisLearn/router"
 )
 
 func main() {
-	client := redis.NewClient(&redis.Options{
-		Addr:     RedisUtil.GetAddr(),
-		Password: RedisUtil.GetPwd(), // no password set
-		DB:       RedisUtil.GetDb(),  // use default DB
-	})
+	// 初始化数据库
+	db := DB.InitDB() //初始化数据库
+	defer func() {
+		sqlDB, err := db.DB()
+		if err != nil {
+			panic("failed to close database" + err.Error())
+		}
+		err = sqlDB.Close()
+		if err != nil {
+			return
+		}
+	}()
 
-	ctx := context.Background()
+	r := router.Routers()
 
-	err := client.Set(ctx, "foo", "bar", 0).Err()
-	if err != nil {
-		panic(err)
-	}
-
-	val, err := client.Get(ctx, "height").Result()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("foo", val)
+	panic(r.Run(":9090"))
 
 }
