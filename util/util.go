@@ -1,9 +1,12 @@
 package util
 
 import (
+	"github.com/gin-gonic/gin"
 	"math/rand"
+	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // GenerateCode 生成六位数验证码
@@ -48,4 +51,27 @@ func CheckIdCard(card string) bool {
 
 	// 返回 MatchString 是否匹配
 	return reg.MatchString(card)
+}
+
+// GetIdFromToken 从token中获取id
+func GetIdFromToken(c *gin.Context) int {
+	// get token
+	tokenString := c.GetHeader("Authorization")
+	//token is nil or token is valid
+	//Determine if the token starts with Bearer
+	if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer") {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "权限不足"})
+		c.Abort()
+	}
+
+	// delete Bearer from token
+	tokenString = tokenString[6:]
+
+	//parse token
+	token, claims, err := ParseToken(tokenString)
+	// error or token is not valid
+	if err != nil || !token.Valid {
+		panic(err)
+	}
+	return claims.UserId
 }

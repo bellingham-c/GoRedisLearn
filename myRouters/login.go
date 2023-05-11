@@ -5,11 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserRoute struct {
+type LoginRoute struct {
 }
 
-func (*UserRoute) InitRouter(g *gin.RouterGroup) {
-	u := g.Group("/user")
+func (*LoginRoute) InitRouter(g *gin.RouterGroup) {
+	u := g.Group("/login")
 	{
 		u.POST("/code", controller.Code)
 		u.POST("/login", controller.Login)

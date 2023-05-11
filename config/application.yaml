@@ -1,28 +1,12 @@
-#mysql
-host: "127.0.0.1"
-username: "root"
-password: "Zxcvbnm565"
-DB: "hdmb"
-port: "3306"
-charset: "utf8mb4"
+mysql:
+  host: "127.0.0.1"
+  username: "root"
+  password: "Zxcvbnm565"
+  DB: "hdmb"
+  port: "3306"
+  charset: "utf8mb4"
 
-
-
-#app_name = "learn go"
-#
-#log_level = "DEBUG"
-#
-#[mysql]
-#host = "127.0.0.1"
-#port = 3306
-#username = "root"
-#password = "Zxcvbnm565"
-#DB = "hdmb"
-#max_life_seconds = 100
-#max_idle_connections = 25
-#max_open_connections = 300
-#charset = "utf8mb4"
-#
-#[redis]
-#ip = "127.0.0.1"
-#port = 7381
+redis:
+  addr: "192.168.192.129:6379"
+  password: "caojinbo"
+  db: 0

@@ -2,6 +2,7 @@ package main
 
 import (
 	"GoRedisLearn/DB"
+	"GoRedisLearn/RedisUtil"
 	"GoRedisLearn/router"
 )
 
@@ -18,9 +19,11 @@ func main() {
 			return
 		}
 	}()
-
+	// 初始化redis
+	RedisUtil.InitRedis()
+	// 初始化router
 	r := router.Routers()
 
+	// 设置监听端口
 	panic(r.Run(":9090"))
-
 }
