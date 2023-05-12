@@ -9,9 +9,8 @@ type LoginRoute struct {
 }
 
 func (*LoginRoute) InitRouter(g *gin.RouterGroup) {
-	u := g.Group("/login")
+	u := g.Group("/test")
 	{
-		u.POST("/code", controller.Code)
-		u.POST("/login", controller.Login)
+		u.POST("/test", controller.Test)
 	}
 }

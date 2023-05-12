@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/structs"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
-	"reflect"
 	"time"
 )
 
@@ -145,7 +145,7 @@ func (rc *_RedisClient) HSET1(key string, field string, value any) (err error) {
 
 func (rc *_RedisClient) HMSET(key string, value any) (err error) {
 	valueMap := struct2map(value)
-	if err = rc.HSet(ctx, key, valueMap).Err(); err != nil {
+	if err = rc.HMSet(ctx, key, valueMap).Err(); err != nil {
 		return err
 	}
 	return nil
@@ -181,17 +181,5 @@ func (rc *_RedisClient) SREM(key string, member ...interface{}) (affect int64) {
 }
 
 func struct2map(value any) map[string]interface{} {
-	valueMap := make(map[string]interface{})
-	v := reflect.ValueOf(value)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	t := v.Type()
-	for i := 0; i < v.NumField(); i++ {
-		field := t.Field(i)
-		if key := field.Tag.Get("json"); key != "" {
-			valueMap[key] = v.Field(i).Interface()
-		}
-	}
-	return valueMap
+	return structs.Map(value)
 }

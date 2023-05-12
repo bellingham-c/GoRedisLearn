@@ -67,7 +67,7 @@ func Login(c *gin.Context) {
 		panic(err)
 	}
 	//7.2 将user对象转为hash存储  重写的hmset方法封装了struct to map方法
-	//7.3 存储
+	//7.3 将用户存储到redis
 	err = rds.HMSET(token, user)
 	if err != nil {
 		panic(err)
