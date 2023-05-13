@@ -23,12 +23,7 @@ func Routers() *gin.Engine {
 	{
 		myRouter.UserRoute.InitRouter(groupRegistry)
 	}
-	login := router.Group("/")
-	{
-		// 使用指定拦截器
-		login.Use(PreHandle)
-		myRouter.LoginRoute.InitRouter(login)
-	}
+
 	return router
 }
 
