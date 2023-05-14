@@ -51,6 +51,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		// 没有用户信息 拦截
 		if reflect.DeepEqual(user, model.TbUser{}) {
 			ctx.JSON(401, nil)
+			fmt.Println("shibai")
 			ctx.Abort()
 		}
 		// 有，放行

@@ -87,7 +87,7 @@ func (rc *_RedisClient) HGETALL(key string) (resultMap map[string]string, err er
 }
 
 func (rc *_RedisClient) HSET(key string, value any) (err error) {
-	if err = rc.Client.HSet(ctx, key, struct2map(value)).Err(); err != nil {
+	if err = rc.Client.HSet(ctx, key, value).Err(); err != nil {
 		return err
 	}
 	return nil

@@ -16,11 +16,12 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 	{
 		u.POST("/code", controller.Code)
 		u.POST("/login", controller.Login)
+		u.POST("/test", controller.Test)
 	}
 	// 需要拦截器
 	c := g.Group("/user")
 	c.Use(middleware.RefreshTokenMiddleware(), middleware.AuthMiddleware())
 	{
-		c.POST("/test", controller.Test)
+		c.POST("/id", controller.QueryById)
 	}
 }
