@@ -47,12 +47,11 @@ func RefreshTokenMiddleware() gin.HandlerFunc {
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fmt.Println("middleware auth")
 		// 没有用户信息 拦截
 		if reflect.DeepEqual(user, model.TbUser{}) {
-			ctx.JSON(401, nil)
-			fmt.Println("shibai")
-			ctx.Abort()
+			fmt.Println(user)
+			ctx.JSON(403, gin.H{"msg": "no auth"})
+			return
 		}
 		// 有，放行
 		ctx.Next()

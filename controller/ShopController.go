@@ -5,11 +5,14 @@ import (
 	"GoRedisLearn/RedisUtil"
 	"GoRedisLearn/model"
 	"GoRedisLearn/response"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"time"
 )
+
+var ctx = context.Background()
 
 func QueryById(c *gin.Context) {
 	id := c.PostForm("id")
@@ -22,7 +25,7 @@ func QueryById(c *gin.Context) {
 	var e model.TbShop
 
 	// 2.判断是否存在
-	if shop != "" {
+	if shop != "" && shop != "null" {
 		// 3.存在直接返回
 		err := json.Unmarshal([]byte(shop), &e)
 		if err != nil {
@@ -31,10 +34,18 @@ func QueryById(c *gin.Context) {
 		c.JSON(200, gin.H{"data": e})
 		return
 	}
+	// 命中为空 返回错误信息
+	if shop == "null" {
+		response.Fail(c, gin.H{"msg": "用户信息不存在"})
+	}
 	// 4.不存在，根据id查询数据库
 	tx := db.Where("id=?", id).Find(&e)
 	if tx.RowsAffected == 0 {
 		// 5.不存在，返回错误
+		err := rds.SET(key, nil, 3*time.Minute)
+		if err != nil {
+			panic(err)
+		}
 		response.Fail(c, nil)
 		return
 	}
@@ -49,7 +60,7 @@ func QueryById(c *gin.Context) {
 
 func Update(c *gin.Context) {
 	var shop = model.TbShop{
-		Id:   1,
+		Id:   2,
 		Name: "caojinbo",
 	}
 	err := c.ShouldBind(&shop)
@@ -68,4 +79,5 @@ func Update(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
+
 }
