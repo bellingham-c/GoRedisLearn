@@ -7,6 +7,6 @@ mysql:
   charset: "utf8mb4"
 
 redis:
-  addr: "192.168.192.129:6379"
+  addr: "192.168.192.130:6379"
   password: "caojinbo"
   db: 0

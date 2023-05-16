@@ -7,7 +7,6 @@ import (
 	"github.com/fatih/structs"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
-	"log"
 	"time"
 )
 
@@ -63,7 +62,6 @@ func (rc *_RedisClient) GET(key string) (result string, err error) {
 
 func (rc *_RedisClient) SET(key string, value any, expiration time.Duration) (err error) {
 	jsonStr, err := json.Marshal(value)
-	log.Println(jsonStr)
 	if err != nil {
 		return err
 	}
