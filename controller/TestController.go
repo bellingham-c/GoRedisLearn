@@ -1,26 +1,28 @@
 package controller
 
 import (
-	"GoRedisLearn/DB"
 	"GoRedisLearn/RedisUtil"
-	"GoRedisLearn/model"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func Test(c *gin.Context) {
-	db := DB.GetDB()
+	//var ctx = context.Background()
+	//rds := RedisUtil.GetClient()
+	//rds.Set(ctx, "test", nil, 30*time.Minute)
+	//
+	//res := rds.Get(ctx, "test").Val()
 	rds := RedisUtil.RedisUtil
-
-	var shop []model.TbShop
-	db.Where("id<3").Find(&shop)
-
-	fmt.Println("shop", shop)
-	err := rds.HSET("test", shop)
+	err := rds.SETWithOutJson("test", nil, 30*time.Minute)
 	if err != nil {
 		panic(err)
 	}
+	res, err := rds.GET("test")
 
-	resultMap, err := rds.HGETALL("test")
-	fmt.Println(resultMap)
+	if res == "" {
+		fmt.Println("res", res)
+	}
+	fmt.Println("res123", res)
+
 }

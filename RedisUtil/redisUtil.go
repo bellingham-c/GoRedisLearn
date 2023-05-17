@@ -60,6 +60,11 @@ func (rc *_RedisClient) GET(key string) (result string, err error) {
 	return
 }
 
+func (rc *_RedisClient) SETWithOutJson(key string, value any, expiration time.Duration) (err error) {
+	err = rc.Client.Set(ctx, key, value, expiration).Err()
+	return
+}
+
 func (rc *_RedisClient) SET(key string, value any, expiration time.Duration) (err error) {
 	jsonStr, err := json.Marshal(value)
 	if err != nil {

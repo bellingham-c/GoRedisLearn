@@ -7,8 +7,10 @@ import (
 	"GoRedisLearn/response"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -80,6 +82,55 @@ func Update(c *gin.Context) {
 		panic(err)
 	}
 
+}
+
+// QueryWithLogicExpire 利用逻辑过期解决缓存击穿
+func QueryWithLogicExpire(c *gin.Context) {
+	rds := RedisUtil.RedisUtil
+	// 1.从redis查询商铺
+	id := c.PostForm("id")
+	key := "cache:shop:" + id
+	// 2.判断是否存在
+	result, _ := rds.GET(key)
+	fmt.Println("res", result)
+	if len(result) == 0 {
+		// 3.不存在 直接返回
+		c.JSON(401, gin.H{"msg": "缓存中没有数据"})
+		return
+	}
+	// 4.命中 将json反序列化未对象
+	var rd model.RedisData
+	err := json.Unmarshal([]byte(result), &rd)
+	if err != nil {
+		panic(err)
+		return
+	}
+	shop := rd.Data
+	expire := rd.ExpireSeconds
+	// 5.判断是否过期
+	if expire.After(time.Now()) {
+		// 5.1 未过期 直接返回商铺信息
+		c.JSON(200, gin.H{"data": shop, "msg": "商铺信息"})
+	}
+	// 5.2 已过期 需要缓存重建
+	// 6 缓存重建
+	// 6.1 获取互斥锁
+	lockKey := "lock:shop:" + id
+	isLock := TryLock(lockKey)
+	// 6.2判断获取锁是否成功
+	if isLock {
+		// TODO 6.3 成功，开启独立线程，实现缓存重建
+		var wait sync.WaitGroup
+		go func() {
+			defer wait.Done()
+			SaveShop2Redis(id, 20)
+		}()
+		wait.Wait()
+		// 释放锁
+		Unlock(lockKey)
+	}
+	// 6.4 返回过期商铺信息
+	c.JSON(200, gin.H{"data": shop, "msg": "商铺信息"})
 }
 
 // QueryWithMutex 互斥锁解决缓存击穿
@@ -198,4 +249,27 @@ func Unlock(key string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func SaveShop2Redis(id string, expireSeconds int) {
+	db := DB.GetDB()
+	rds := RedisUtil.RedisUtil
+	// 1.查询店铺数据
+	var shop model.TbShop
+	db.Where("id=?", id).Find(&shop)
+	// 2.封装逻辑过期时间
+	now := time.Now()
+	newTime := now.Add(time.Second * 20)
+	data := model.RedisData{
+		Data:          shop,
+		ExpireSeconds: newTime,
+	}
+	// 3.写入redis 序列化为json
+	jsonBytes, err := json.Marshal(data)
+	fmt.Println("data", jsonBytes)
+	if err != nil {
+		panic(err)
+	}
+	key := "cache:shop:" + id
+	rds.SET(key, jsonBytes, 0).Error()
 }

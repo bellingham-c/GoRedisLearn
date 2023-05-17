@@ -19,6 +19,7 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 		u.POST("/test", controller.Test)
 		u.POST("/update", controller.Update)
 		u.POST("/m", controller.QueryWithMutex)
+		u.POST("/s", controller.QueryWithLogicExpire)
 	}
 	// 需要拦截器
 	c := g.Group("/user")
