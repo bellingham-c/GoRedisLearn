@@ -16,7 +16,7 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 	{
 		u.POST("/code", controller.Code)
 		u.POST("/login", controller.Login)
-		u.POST("/test", controller.Test)
+		u.POST("/test", controller.SeckillVoucher)
 		u.POST("/update", controller.Update)
 		u.POST("/m", controller.QueryWithMutex)
 		u.POST("/s", controller.QueryWithLogicExpire)

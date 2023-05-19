@@ -3,7 +3,7 @@ package model
 import "time"
 
 type TbVoucherOrder struct {
-	Id         int
+	Id         int64
 	UserId     int       // 下单的用户id
 	VoucherId  int       // 购买的代金券id
 	PayType    int       // 支付方式
