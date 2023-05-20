@@ -1,13 +1,14 @@
 package controller
 
 import (
-	"GoRedisLearn/model"
-	"fmt"
+	"GoRedisLearn/RedisUtil"
+	"context"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func Test(c *gin.Context) {
-	var t model.Test
-	c.ShouldBind(&t).Error()
-	fmt.Println("t", t)
+	var ctx = context.Background()
+	rds := RedisUtil.GetClient()
+	rds.Set(ctx, "caojinbo", "test", 30*time.Second)
 }
