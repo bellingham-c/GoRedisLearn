@@ -24,5 +24,5 @@ func Test(c *gin.Context) {
 	}
 	res := rds.Get(ctx, "caojinbo").Val()
 	fmt.Println("res", res)
-
+	// caojinceshi
 }
