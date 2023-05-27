@@ -16,7 +16,7 @@ func Code(c *gin.Context) {
 	phone := c.PostForm("phone")
 	//1.校验手机号
 	if !util.CheckMobile(phone) {
-		//2.不符合，返回错误信息
+		//2.不符合 返回错误信息
 		response.Fail(c, nil)
 	}
 	//3.符合，生成验证码
