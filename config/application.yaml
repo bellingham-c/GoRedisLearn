@@ -1,12 +1,12 @@
 mysql:
   host: "127.0.0.1"
   username: "root"
-  password: "Zxcvbnm565"
+  password: "caojinbo"
   DB: "hdmb"
   port: "3306"
   charset: "utf8mb4"
 
 redis:
-  addr: "192.168.192.130:6379"
+  addr: "192.168.80.128:6379"
   password: "caojinbo"
   db: 0
