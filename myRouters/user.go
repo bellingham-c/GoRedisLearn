@@ -22,6 +22,12 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 		u.POST("/s", controller.QueryWithLogicExpire)
 		u.POST("/blog", controller.LikeBlog)
 		u.POST("/5", controller.LikeBlogTop5)
+		u.POST("/sb", controller.SaveBolg)
+		u.POST("/follow", controller.Follow)
+		u.POST("/followOrNot", controller.IsFollow)
+		u.POST("/common", controller.Common)
+		u.POST("/fbr", controller.FollowByRedis)
+		u.POST("/cbr", controller.CommonByRedis)
 	}
 	// 需要拦截器
 	c := g.Group("/user")

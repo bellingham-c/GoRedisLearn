@@ -10,7 +10,7 @@ type TbBlog struct {
 	Images     string
 	Content    string
 	Liked      string
-	Comments   string
+	Comments   int
 	CreateTime time.Time
 	UpdateTime time.Time
 }

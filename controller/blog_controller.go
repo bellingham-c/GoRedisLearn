@@ -15,7 +15,7 @@ import (
 
 var RCTX = context.Background()
 
-// 实现点赞功能 使用sorted set 方便查询
+// LikeBlog 实现点赞功能 使用sorted set 方便查询
 func LikeBlog(c *gin.Context) {
 	rds := RedisUtil.RedisUtil
 	db := DB.GetDB()
@@ -57,4 +57,49 @@ func LikeBlogTop5(c *gin.Context) {
 	// 获取前五个点赞的
 	zRange := rds.ZRange(RCTX, key, 0, 5)
 	fmt.Println(zRange)
+}
+
+// 保存blog到数据库，以及推送消息到其粉丝
+func SaveBolg(c *gin.Context) {
+	// 当前用户id
+	userId := 12
+
+	// 1 获取登录用户
+	blog := model.TbBlog{
+		UserId:     userId,
+		ShopId:     2,
+		Title:      "cao",
+		Images:     "jin",
+		Content:    "bo",
+		Liked:      "0",
+		Comments:   104,
+		CreateTime: time.Now(),
+		UpdateTime: time.Now(),
+	}
+
+	db := DB.GetDB()
+	rds := RedisUtil.RedisUtil
+
+	// 2 保存探店笔记
+	tx := db.Debug().Save(&blog)
+
+	// 保存成功
+	if tx.RowsAffected == 0 {
+		fmt.Println("保存失败")
+	}
+
+	// 查询笔者所有粉丝
+	var follows []model.TbFollow
+	tx = db.Debug().Where("follow_user_id=?", userId).Find(&follows)
+
+	for _, follow := range follows {
+		// 获取粉丝id
+		uid := follow.UserId
+		// 推送
+		// 将消息推送到粉丝收件箱
+		key := "feed:" + strconv.Itoa(uid)
+		rds.ZADD(key, redis.Z{Score: float64(time.Now().Unix()), Member: blog.Id})
+	}
+	//5 返回id
+	fmt.Println("id:", blog.Id)
 }
