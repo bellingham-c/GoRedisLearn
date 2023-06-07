@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"strconv"
 	"time"
 )
@@ -102,4 +103,58 @@ func SaveBolg(c *gin.Context) {
 	}
 	//5 返回id
 	fmt.Println("id:", blog.Id)
+}
+
+func QueryBlogOfFollow(c *gin.Context) {
+
+	// 上次查询的最后一个值，便是此次查询的最大值
+	max := c.PostForm("lastId")
+	// 查询偏移量
+	offset, _ := strconv.Atoi(c.PostForm("offset"))
+
+	if offset == 0 {
+		// 第一次来的时候 offset没有值 因此给予默认值
+		offset = 0
+	}
+	rds := RedisUtil.RedisUtil
+	db := DB.GetDB()
+
+	// 1 获取当前用户 TODO 在此处直接指明用户id
+	userId := 1
+	// 2 查询收件箱 ZREVRANGEBYSCORE key Max Min LIMIT offset count
+	key := "feed:" + strconv.Itoa(userId)
+	scores := rds.ZRevRangeByScoreWithScores(RCTX, key, &redis.ZRangeBy{
+		Min: "0", Max: max, Offset: int64(offset), Count: 3,
+	})
+	// TODO 这里应该要加一个非空判断
+
+	// 3 解析数据 blogId minTime(时间戳）offset
+	ids := make([]interface{}, 0, len(scores.Val()))
+	fmt.Println("len:", len(scores.Val()))
+	var minTime float64 = 0
+	//offset
+	os := 1
+	for _, score := range scores.Val() {
+		// 获取id
+		id := score.Member
+		ids = append(ids, id)
+		// 获取分数（时间戳）
+		t := score.Score
+		if minTime == t {
+			os++
+		} else {
+			minTime = t
+			os = 1
+		}
+	}
+	// 4 根据id查询blog
+	fmt.Println("ids:", ids)
+	var blog []model.TbBlog
+	db.Debug().Where("id IN ?", ids).Clauses(clause.OrderBy{
+		Expression: clause.Expr{SQL: "FIELD(id,?)", Vars: []interface{}{ids}, WithoutParentheses: true},
+	}).Find(&blog)
+	// 5 封装并返回
+	for _, tbBlog := range blog {
+		fmt.Println("blog:", tbBlog)
+	}
 }
