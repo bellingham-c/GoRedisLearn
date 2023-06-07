@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"strconv"
 	"sync"
 	"time"
@@ -272,4 +273,25 @@ func SaveShop2Redis(id string, expireSeconds int) {
 	}
 	key := "cache:shop:" + id
 	rds.SET(key, jsonBytes, 0).Error()
+}
+
+func LoadShopData(c *gin.Context) {
+	db := DB.GetDB()
+	rds := RedisUtil.RedisUtil
+
+	// 1 把店铺分组 按照typeId分组 typeID一致的放在一个集合
+	// 1.1 获取全部类型
+	var typeList []int
+	db.Debug().Raw("select distinct type_id from tb_shop").Scan(&typeList)
+	// 2 分批完成写入redis
+	for _, i := range typeList {
+		var shopIdTemp []model.TbShop
+		// 2.1 获取同类型的店铺的集合
+		key := "shop:geo:" + strconv.Itoa(i)
+		db.Debug().Where("type_id=?", i).Find(&shopIdTemp)
+		for _, shop := range shopIdTemp {
+			// 2.2 写入redis GEOADD key 经度 纬度 member
+			rds.GeoAdd(RCTX, key, &redis.GeoLocation{Longitude: shop.X, Latitude: shop.Y, Name: strconv.Itoa(shop.Id)})
+		}
+	}
 }
