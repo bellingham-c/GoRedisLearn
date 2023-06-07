@@ -78,3 +78,17 @@ func Login(c *gin.Context) {
 	//9 返回token
 	response.Success(c, gin.H{"token": token})
 }
+
+func Sign(c *gin.Context) {
+	rds := RedisUtil.RedisUtil
+	// 1 获取当前用户
+	id := "1"
+	// 2 获取日期
+	t := ":" + time.Now().Format("200601")
+	// 3 拼接key
+	key := "sign:" + id + t
+	// 4 获取今天是本月的第几天
+	m := time.Now().Day()
+	// 5 写入redis setbit key offset 1
+	rds.SetBit(RCTX, key, int64(m-1), 1)
+}

@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-var ctx = context.Background()
+const DEFAULT_PAGE_SIZE = 10
 
 func QueryById(c *gin.Context) {
 	id := c.PostForm("id")
@@ -293,5 +293,60 @@ func LoadShopData(c *gin.Context) {
 			// 2.2 写入redis GEOADD key 经度 纬度 member
 			rds.GeoAdd(RCTX, key, &redis.GeoLocation{Longitude: shop.X, Latitude: shop.Y, Name: strconv.Itoa(shop.Id)})
 		}
+	}
+}
+
+func QueryShopByType(c *gin.Context) {
+	db := DB.GetDB()
+	rds := RedisUtil.RedisUtil
+
+	// 类型id
+	typeId := c.PostForm("typeId")
+	// 页码 滚动查询
+	current, _ := strconv.Atoi(c.PostForm("current"))
+	// 经度
+	x, _ := strconv.ParseFloat(c.PostForm("x"), 64)
+	// 纬度
+	y, _ := strconv.ParseFloat(c.PostForm("y"), 64)
+
+	var shops []model.TbShop
+
+	// 1 判断是否需要根据经纬度查询
+	if x == 0 || y == 0 {
+		// 这里的10 应该是默认分页大小
+		db.Debug().Where("type_id=?", typeId).Offset((current - 1) * DEFAULT_PAGE_SIZE).Limit(DEFAULT_PAGE_SIZE).Find(&shops)
+	}
+	// 2 计算分页参数
+	from := (current - 1) * DEFAULT_PAGE_SIZE
+	end := current * DEFAULT_PAGE_SIZE
+	// 3 查询redis 按照距离排序，分页。结果：shopId distance
+	key := "shop:geo:" + typeId
+	// radius 默认单位 km
+	gsq := redis.GeoSearchQuery{
+		Longitude: x,
+		Latitude:  y,
+		Radius:    1,
+	}
+	search := rds.GeoSearchLocation(RCTX, key, &redis.GeoSearchLocationQuery{GeoSearchQuery: gsq, WithDist: true}).Val()
+	// 4 解析出id
+	// 确保不越界
+	if len(search) >= (end - from) {
+		search = search[from:end]
+	}
+	// 5 根据id查询shop
+	ids := make([]int, 0)
+	for _, s := range search {
+		id, _ := strconv.Atoi(s.Name)
+		ids = append(ids, id)
+	}
+	// TODO 这里应该按照redis中 缓存的顺序来查 order by id 比较懒，这里就不写了 可以参照下面
+	//db.Debug().Where("id IN ?", ids).Clauses(clause.OrderBy{
+	//	Expression: clause.Expr{SQL: "FIELD(id,?)", Vars: []interface{}{ids}, WithoutParentheses: true},
+	//}).Find(&blog)
+	db.Debug().Where("id IN ?", ids).Find(&shops)
+	// 6 返回
+	for _, shop := range shops {
+		fmt.Println("shop:", shop)
+		fmt.Println("shop distance:", shop)
 	}
 }

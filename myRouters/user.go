@@ -30,6 +30,8 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 		u.POST("/cbr", controller.CommonByRedis)
 		u.POST("/qbof", controller.QueryBlogOfFollow)
 		u.POST("/lsd", controller.LoadShopData)
+		u.POST("/qsbt", controller.QueryShopByType)
+		u.POST("/sign", controller.Sign)
 	}
 	// 需要拦截器
 	c := g.Group("/user")

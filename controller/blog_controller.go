@@ -43,12 +43,10 @@ func LikeBlog(c *gin.Context) {
 	} else {
 		// 4 已点赞 取消点赞
 		// 4.1 数据库点赞数减一
-		fmt.Println("dianzan")
 		db.Table("tb_blog").Where("id=?", blogId).UpdateColumn("liked", gorm.Expr("liked-?", 1))
 		// 4.2把用户从redis的set集合移除
 		rds.ZRem(RCTX, key, user.Id)
 	}
-
 }
 
 // LikeBlogTop5 获取前五个点赞的
