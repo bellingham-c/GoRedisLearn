@@ -16,7 +16,6 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 	{
 		u.POST("/code", controller.Code)
 		u.POST("/login", controller.Login)
-		u.POST("/test", controller.Test)
 		u.POST("/update", controller.Update)
 		u.POST("/m", controller.QueryWithMutex)
 		u.POST("/s", controller.QueryWithLogicExpire)
@@ -32,6 +31,8 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 		u.POST("/lsd", controller.LoadShopData)
 		u.POST("/qsbt", controller.QueryShopByType)
 		u.POST("/sign", controller.Sign)
+		u.POST("/sc", controller.SignCount)
+		u.POST("/hl", controller.HyperLog)
 	}
 	// 需要拦截器
 	c := g.Group("/user")
