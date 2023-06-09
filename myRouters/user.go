@@ -33,6 +33,7 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 		u.POST("/sign", controller.Sign)
 		u.POST("/sc", controller.SignCount)
 		u.POST("/hl", controller.HyperLog)
+		u.POST("/cjb", controller.Caojinbo)
 	}
 	// 需要拦截器
 	c := g.Group("/user")

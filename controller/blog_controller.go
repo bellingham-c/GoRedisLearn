@@ -156,3 +156,9 @@ func QueryBlogOfFollow(c *gin.Context) {
 		fmt.Println("blog:", tbBlog)
 	}
 }
+
+func Caojinbo(c *gin.Context) {
+	rds := RedisUtil.RedisUtil
+
+	rds.SET("caojinbo", "lxh", 0)
+}
