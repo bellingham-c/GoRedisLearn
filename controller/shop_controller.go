@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const DEFAULT_PAGE_SIZE = 10
+const DefaultPageSize = 10
 
 func QueryById(c *gin.Context) {
 	id := c.PostForm("id")
@@ -314,11 +314,11 @@ func QueryShopByType(c *gin.Context) {
 	// 1 判断是否需要根据经纬度查询
 	if x == 0 || y == 0 {
 		// 这里的10 应该是默认分页大小
-		db.Debug().Where("type_id=?", typeId).Offset((current - 1) * DEFAULT_PAGE_SIZE).Limit(DEFAULT_PAGE_SIZE).Find(&shops)
+		db.Debug().Where("type_id=?", typeId).Offset((current - 1) * DefaultPageSize).Limit(DefaultPageSize).Find(&shops)
 	}
 	// 2 计算分页参数
-	from := (current - 1) * DEFAULT_PAGE_SIZE
-	end := current * DEFAULT_PAGE_SIZE
+	from := (current - 1) * DefaultPageSize
+	end := current * DefaultPageSize
 	// 3 查询redis 按照距离排序，分页。结果：shopId distance
 	key := "shop:geo:" + typeId
 	// radius 默认单位 km
