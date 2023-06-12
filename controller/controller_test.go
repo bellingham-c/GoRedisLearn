@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"GoRedisLearn/RedisUtil"
+	"GoRedisLearn/redisCluster/demo"
 	"testing"
 )
 
 func TestHyper(t *testing.T) {
-	rds := RedisUtil.RedisUtil
-
-	rds.SET("caojinbo", "lxh", 0)
+	demo.SampleDemo()
 }
