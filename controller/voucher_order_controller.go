@@ -4,6 +4,7 @@ import (
 	"GoRedisLearn/DB"
 	"GoRedisLearn/model"
 	"GoRedisLearn/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
@@ -14,7 +15,7 @@ import (
 
 var lock sync.Mutex
 
-func SeckillVoucher(c *gin.Context) {
+func SecKillVoucher(c *gin.Context) {
 	db := DB.GetDB()
 	// 1 查寻优惠券
 	id := c.PostForm("id")
@@ -59,7 +60,6 @@ func SeckillVoucher(c *gin.Context) {
 	}
 	CreateVoucherOrder(vId, c)
 	util.UnLock(uid.String())
-
 }
 
 func CreateVoucherOrder(voucherId int, c *gin.Context) {
@@ -92,7 +92,13 @@ func CreateVoucherOrder(voucherId int, c *gin.Context) {
 
 	// time
 	vo.CreateTime = time.Now()
+	vo.UpdateTime = time.Now()
+	vo.PayTime = time.Now()
+	vo.UseTime = time.Now()
+	vo.RefundTime = time.Now()
 	// 保存订单
+	fmt.Println("vo", vo)
+
 	tx = db.Save(&vo)
 	if tx.RowsAffected == 0 {
 		c.JSON(500, gin.H{"msg": "库存不足"})

@@ -16,7 +16,7 @@ var user model.TbUser
 func RefreshTokenMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//1 获取请求头的token
-		token := c.GetHeader("Authorization") //
+		token := c.GetHeader("Authorization")
 		if token == "" {
 			//token 不存在 放行
 			return

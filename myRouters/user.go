@@ -34,6 +34,9 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 		u.POST("/sc", controller.SignCount)
 		u.POST("/hl", controller.HyperLog)
 		u.POST("/cjb", controller.Caojinbo)
+
+		u.POST("/xsms", controller.SecKillVoucher)   // 限时秒杀
+		u.POST("/xsms2", controller.SecKillVoucher2) // 限时秒杀
 	}
 	// 需要拦截器
 	c := g.Group("/user")
