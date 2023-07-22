@@ -7,23 +7,26 @@ import (
 )
 
 var (
-	KEY_PREFIX = "lock:"
-	RDS_CTX    = context.Background()
-	rds        = RedisUtil.GetClient()
+	KEY     = "lock:oversold"
+	RDS_CTX = context.Background()
+	rds     = RedisUtil.GetClient()
 )
 
-func TryLock(UUID string, ttl int) bool {
-	key := KEY_PREFIX + UUID
-	t := time.Duration(ttl) * time.Minute
-	nx := rds.SetNX(RDS_CTX, key, 1, t).Val()
-	return nx
+func TryLock(UUID string, c context.Context) bool {
+	// 设置失效时间，保证锁失效机制，防止死锁
+	t := 30 * time.Second
+	nx := rds.SetNX(c, KEY, UUID, t)
+	rds.Set(c, "caojinbo", UUID, 1*time.Minute)
+	return nx.Val()
 }
 
-func UnLock(UUID string) bool {
-	key := KEY_PREFIX + UUID
-	del := rds.Del(RDS_CTX, key).Val()
-	if del > 0 {
-		return true
+func UnLock(UUID string, c context.Context) bool {
+	t_uuid := rds.Get(c, KEY).Val()
+	if UUID == t_uuid {
+		del := rds.Del(RDS_CTX, KEY).Val()
+		if del > 0 {
+			return true
+		}
 	}
 	return false
 }

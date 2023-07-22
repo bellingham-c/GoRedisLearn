@@ -6,9 +6,7 @@ import (
 	"GoRedisLearn/util"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -51,15 +49,15 @@ func SecKillVoucher(c *gin.Context) {
 	//CreateVoucherOrder(vId, c)
 	//lock.Unlock()
 
-	// TODO 使用分布式锁来进行加锁，即使用redis的setnx方法 来确保每个用户每次只有一个请求能生效
-	uid := uuid.NewV4()
-	util.TryLock(uid.String(), 30)
-	vId, err := strconv.Atoi(id)
-	if err != nil {
-		panic(err)
-	}
-	CreateVoucherOrder(vId, c)
-	util.UnLock(uid.String())
+	//// TODO 使用分布式锁来进行加锁，即使用redis的setnx方法 来确保每个用户每次只有一个请求能生效
+	//uid := uuid.NewV4()
+	//util.TryLock(uid.String(), 30)
+	//vId, err := strconv.Atoi(id)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//CreateVoucherOrder(vId, c)
+	//util.UnLock(uid.String())
 }
 
 func CreateVoucherOrder(voucherId int, c *gin.Context) {
