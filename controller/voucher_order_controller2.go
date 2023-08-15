@@ -3,7 +3,9 @@ package controller
 import (
 	"GoRedisLearn/DB"
 	"GoRedisLearn/model"
+	"GoRedisLearn/newRedisLock"
 	"GoRedisLearn/util"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
@@ -191,9 +193,69 @@ func SecKillVoucher5(c *gin.Context) {
 	util.UnLock(uid.String(), c)
 }
 
+// 带有看门狗的分布式锁
+func SecKillVoucher6(c *gin.Context) {
+	fmt.Println("watch dog is coming")
+	db := DB.GetDB()
+	// 查寻优惠券
+	id := c.PostForm("id")
+	var sv model.TbSeckillVoucher
+	// 获取锁
+
+	//for {
+	//	db.Where("voucher_id=?", id).Find(&sv)
+	//	// 判断库存是否充足
+	//	if sv.Stock < 1 {
+	//		// 库存不足 返回错误信息
+	//		c.JSON(500, gin.H{"msg": "库存不足"})
+	//		return
+	//	}
+	//	if util.TryLock(uid.String(), c) {
+	//		break
+	//	}
+	//}
+
+	r := newRedisLock.NewClient()
+	rdsLock := newRedisLock.NewRedisLock("test_key", r)
+
+	for {
+		db.Where("voucher_id=?", id).Find(&sv)
+		// 判断库存是否充足
+		if sv.Stock < 1 {
+			// 库存不足 返回错误信息
+			c.JSON(500, gin.H{"msg": "库存不足"})
+			return
+		}
+		// 上锁成功
+		if rdsLock.Lock(c) == nil {
+			break
+		}
+	}
+
+	vId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(err)
+	}
+	createOrder(c, vId)
+	// 释放锁
+	err = rdsLock.Unlock(c)
+	if err != nil {
+		errors.New("fail to release lock")
+		return
+	}
+}
+
 func createOrder(c *gin.Context, voucherId int) {
 	db := DB.GetDB()
 
+	// 一人一单
+	//var tvo model.TbVoucherOrder
+	//count := db.Where("user_id=1").Where("voucher_id=?", voucherId).Find(&tvo)
+	//if count.RowsAffected > 0 {
+	//	c.JSON(500, gin.H{"msg": "已经买过了"})
+	//	c.Abort()
+	//	return
+	//}
 	// 5 扣减库存
 	tx := db.Table("tb_seckill_voucher").Where("voucher_id=?", voucherId).UpdateColumn("stock", gorm.Expr("stock-?", 1))
 	if tx.RowsAffected == 0 {
@@ -223,7 +285,7 @@ func createOrder(c *gin.Context, voucherId int) {
 
 	tx = db.Save(&vo)
 	if tx.RowsAffected == 0 {
-		c.JSON(500, gin.H{"msg": "库存不足"})
+		c.JSON(500, gin.H{"msg": "订单创建失败"})
 		return
 	}
 	// 7 返回订单id

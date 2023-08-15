@@ -40,6 +40,7 @@ func (*UserRoute) InitRouter(g *gin.RouterGroup) {
 		u.POST("/xsms3", controller.SecKillVoucher3) // 限时秒杀 乐观锁
 		u.POST("/xsms4", controller.SecKillVoucher4) // 限时秒杀 不加锁
 		u.POST("/xsms5", controller.SecKillVoucher5) // 限时秒杀 分布式锁
+		u.POST("/xsms6", controller.SecKillVoucher6) // 限时秒杀 分布式锁带看门狗
 	}
 	// 需要拦截器
 	c := g.Group("/user")
