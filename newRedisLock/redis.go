@@ -14,7 +14,7 @@ type Client struct {
 
 func NewClient() *Client {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "43.143.241.157:6379",
+		Addr:     "1.2.3.4:6379",
 		Password: "123456",
 		DB:       0,
 	})
